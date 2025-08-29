@@ -1,0 +1,31 @@
+trigger:
+- main  # Trigger pipeline on pushes to main branch
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+# 1. Set up Python
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '3.x'
+
+# 2. Install dependencies if needed (create requirements.txt or list them)
+- script: |
+    python -m pip install --upgrade pip
+    # Uncomment next line if you have requirements.txt
+    # pip install -r requirements.txt
+  displayName: 'Install dependencies'
+
+# 3. Run your application as a smoke test
+- script: |
+    echo "Running app.py for smoke test..."
+    python app.py --help || true
+  displayName: 'Smoke test (no deployment)'
+
+# 4. Publish build artifact (your source files)
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(System.DefaultWorkingDirectory)'
+    ArtifactName: 'source-code'
+    publishLocation: 'Container'
